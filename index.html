@@ -743,6 +743,80 @@
     font-size: 0.9rem;
   }
 
+  .auth-gate{
+    position: fixed;
+    inset: 0;
+    background: var(--paper);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index: 100;
+    padding: 1.5rem;
+  }
+  .auth-card{
+    width: 100%;
+    max-width: 22rem;
+    text-align:center;
+  }
+  .auth-eyebrow{
+    font-family: var(--font-body);
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    color: var(--brand-teal);
+    margin: 0 0 0.5rem;
+  }
+  .auth-brand{
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: 0.01em;
+    margin: 0 0 0.35rem;
+    background: var(--brand-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .auth-sub{
+    color: var(--ink-soft);
+    font-size: 0.88rem;
+    margin: 0 0 1.6rem;
+  }
+  #auth-form{ display:flex; flex-direction:column; gap: 0.8rem; }
+  .auth-input{
+    font-family: var(--font-body);
+    font-size: 0.95rem;
+    padding: 0.7rem 0.9rem;
+    border: 1px solid var(--line);
+    border-radius: 9px;
+    background: var(--surface);
+    color: var(--ink);
+    outline: none;
+    text-align:center;
+  }
+  .auth-input:focus{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+  .auth-btn{
+    background: var(--accent);
+    color: var(--surface);
+    border: none;
+    padding: 0.7rem 1rem;
+    border-radius: 9px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-family: var(--font-body);
+  }
+  .auth-btn:hover{ background: var(--accent-ink); }
+  .auth-error{
+    color: var(--critical);
+    font-size: 0.82rem;
+    margin: 0.3rem 0 0;
+  }
+
   .notes-block{ grid-column: 1 / -1; }
   .notes-input{
     width: 100%;
@@ -874,6 +948,18 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
+<div class="auth-gate" id="auth-gate">
+  <div class="auth-card">
+    <p class="auth-eyebrow">Sellmed Brasil</p>
+    <h1 class="auth-brand">Controle de Eventos</h1>
+    <p class="auth-sub">Digite a senha para continuar</p>
+    <form id="auth-form">
+      <input type="password" id="auth-password" class="auth-input" placeholder="Senha" autocomplete="current-password" />
+      <button type="submit" class="auth-btn">Entrar</button>
+      <p class="auth-error" id="auth-error" hidden>Senha incorreta. Tente novamente.</p>
+    </form>
+  </div>
+</div>
 <div class="wrap">
 
   <header class="page-header">
@@ -2341,16 +2427,48 @@
     renderDashboard();
   });
 
-  if (sb && !hasAnyLocalData()) {
-    document.getElementById("app").innerHTML = '<div class="loading-state">Carregando seus dados…</div>';
-    syncFromCloud().finally(route);
-  } else {
-    route();
-    if (sb) {
-      syncFromCloud().then(changed => { if (changed) route(); });
+  function bootApp(){
+    if (sb && !hasAnyLocalData()) {
+      document.getElementById("app").innerHTML = '<div class="loading-state">Carregando seus dados…</div>';
+      syncFromCloud().finally(route);
     } else {
-      updateSyncBadge();
+      route();
+      if (sb) {
+        syncFromCloud().then(changed => { if (changed) route(); });
+      } else {
+        updateSyncBadge();
+      }
     }
+  }
+
+  // ---------- access gate ----------
+  // Client-side only: a soft lock to keep casual visitors out, not real
+  // security (the password lives in this file's source). Good enough to
+  // keep the link from being stumbled upon; not meant to gate sensitive data.
+  const AUTH_KEY = "sellmed-eventos-2026-unlocked";
+  const AUTH_PASSWORD = "sellmed2026";
+  const authGate = document.getElementById("auth-gate");
+
+  if (localStorage.getItem(AUTH_KEY) === "1") {
+    authGate.remove();
+    bootApp();
+  } else {
+    const authForm = document.getElementById("auth-form");
+    const authInput = document.getElementById("auth-password");
+    const authError = document.getElementById("auth-error");
+    authForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      if (authInput.value === AUTH_PASSWORD) {
+        localStorage.setItem(AUTH_KEY, "1");
+        authGate.remove();
+        bootApp();
+      } else {
+        authError.hidden = false;
+        authInput.value = "";
+        authInput.focus();
+      }
+    });
+    authInput.focus();
   }
 })();
 </script>
