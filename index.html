@@ -736,6 +736,13 @@
     font-size: 0.9rem;
   }
 
+  .loading-state{
+    padding: 5rem 1rem;
+    text-align:center;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+
   .notes-block{ grid-column: 1 / -1; }
   .notes-input{
     width: 100%;
@@ -864,6 +871,7 @@
     .event-grid{ grid-template-columns: 1fr; }
   }
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -890,7 +898,8 @@
   <main id="app"></main>
 
   <footer>
-    Checklist e anotações ficam salvos neste navegador. Datas de cota confirmadas apenas para SOLACI, V Summit Associiesp, Simpósio Norte Nordeste e PCR Rio Valves — os demais eventos ainda aguardam informações da organização.
+    <p id="sync-status" style="margin:0 0 0.5rem;font-weight:600;">Verificando conexão com a nuvem…</p>
+    Datas de cota confirmadas apenas para SOLACI, V Summit Associiesp, Simpósio Norte Nordeste e PCR Rio Valves — os demais eventos ainda aguardam informações da organização.
   </footer>
 </div>
 
@@ -996,6 +1005,83 @@
     PAYMENT_STATUS_KEY, CREDENTIALS_KEY, EXHIBITORS_KEY, ATTACHMENTS_KEY,
     COTA_KEY, EVENT_DATE_KEY, EVENT_VENUE_KEY
   ];
+
+  // ---------- cloud sync (Supabase) ----------
+  // Works only where outbound network calls are allowed (the standalone
+  // Vercel deployment). Inside the sandboxed claude.ai Artifact preview
+  // these calls are blocked, so the app quietly falls back to
+  // localStorage-only — same as before this feature existed.
+  const SUPABASE_URL = "https://upgqgexiykxclpjvipsm.supabase.co";
+  const SUPABASE_ANON_KEY = "sb_publishable_Bv425fl3nEu7VxcFmqrrGQ_aQXmM9c5";
+  const sb = (window.supabase && window.supabase.createClient)
+    ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : null;
+  let cloudAvailable = false;
+
+  function hasAnyLocalData(){
+    return APP_STORAGE_KEYS.some(key => localStorage.getItem(key) != null);
+  }
+
+  function syncKeyToCloud(key, value){
+    if (!sb) return;
+    sb.from("app_state").upsert({ key, value, updated_at: new Date().toISOString() })
+      .then(({ error }) => {
+        cloudAvailable = !error;
+        updateSyncBadge();
+        if (error) console.warn("cloud sync (save) failed for", key, error.message);
+      });
+  }
+
+  function replaceStateContents(target, source){
+    if (Array.isArray(target)) {
+      target.length = 0;
+      if (Array.isArray(source)) target.push(...source);
+    } else if (target && typeof target === "object") {
+      Object.keys(target).forEach(k => delete target[k]);
+      if (source && typeof source === "object") Object.assign(target, source);
+    }
+  }
+
+  async function syncFromCloud(){
+    if (!sb) return false;
+    const { data, error } = await sb.from("app_state").select("key, value");
+    cloudAvailable = !error;
+    updateSyncBadge();
+    if (error || !data) {
+      if (error) console.warn("cloud sync (load) failed:", error.message);
+      return false;
+    }
+    const stateMap = {
+      [TASKS_KEY]: taskState, [NOTES_KEY]: notesState, [CUSTOM_KEY]: customEvents,
+      [EXTRA_TASKS_KEY]: extraTasksState, [DELETED_TASKS_KEY]: deletedTasksState,
+      [EXTRA_CONTACTS_KEY]: extraContactsState, [CONTRAPARTIDAS_KEY]: contrapartidasState,
+      [LOGISTICS_KEY]: logisticsState, [CONTRACT_STATUS_TEXT_KEY]: contractStatusTextState,
+      [PAYMENT_STATUS_KEY]: paymentStatusState, [CREDENTIALS_KEY]: credentialsState,
+      [EXHIBITORS_KEY]: exhibitorsState, [ATTACHMENTS_KEY]: attachmentsState,
+      [COTA_KEY]: cotaState, [EVENT_DATE_KEY]: eventDateState, [EVENT_VENUE_KEY]: eventVenueState
+    };
+    let changed = false;
+    data.forEach(row => {
+      if (Object.prototype.hasOwnProperty.call(stateMap, row.key)) {
+        replaceStateContents(stateMap[row.key], row.value);
+        localStorage.setItem(row.key, JSON.stringify(row.value));
+        changed = true;
+      }
+    });
+    return changed;
+  }
+
+  function updateSyncBadge(){
+    const el = document.getElementById("sync-status");
+    if (!el) return;
+    if (!sb) {
+      el.textContent = "Salvo apenas neste navegador (pré-visualização sem acesso à nuvem).";
+    } else if (cloudAvailable) {
+      el.textContent = "Sincronizado com a nuvem — acessível de qualquer aparelho.";
+    } else {
+      el.textContent = "Sem conexão com a nuvem no momento — salvando só neste navegador.";
+    }
+  }
 
   const PAYMENT_STATUS_META = {
     "": { label: "Sem informação", cls: "unknown" },
@@ -1319,7 +1405,10 @@
     try{ const v = JSON.parse(localStorage.getItem(key)); return v == null ? fallback : v; }
     catch(e){ return fallback; }
   }
-  function saveJSON(key, value){ localStorage.setItem(key, JSON.stringify(value)); }
+  function saveJSON(key, value){
+    localStorage.setItem(key, JSON.stringify(value));
+    syncKeyToCloud(key, value);
+  }
 
   const taskState = loadJSON(TASKS_KEY, {});
   const notesState = loadJSON(NOTES_KEY, {});
@@ -2252,7 +2341,17 @@
     renderDashboard();
   });
 
-  route();
+  if (sb && !hasAnyLocalData()) {
+    document.getElementById("app").innerHTML = '<div class="loading-state">Carregando seus dados…</div>';
+    syncFromCloud().finally(route);
+  } else {
+    route();
+    if (sb) {
+      syncFromCloud().then(changed => { if (changed) route(); });
+    } else {
+      updateSyncBadge();
+    }
+  }
 })();
 </script>
 </body>
