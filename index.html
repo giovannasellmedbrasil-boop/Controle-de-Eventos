@@ -546,6 +546,24 @@
     text-wrap: balance;
     letter-spacing: 0.005em;
   }
+  .detail-name-input{
+    display:block;
+    width: 100%;
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    font-size: clamp(1.2rem, 2.6vw, 1.7rem);
+    letter-spacing: 0.005em;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    padding: 0.1rem 0;
+    margin: 0 0 0.35rem;
+    outline: none;
+  }
+  .detail-name-input:hover{ border-bottom-color: var(--line); }
+  .detail-name-input:focus{ border-bottom-color: var(--accent); }
   .detail-meta{ margin: 0 0 1rem; color: var(--ink-soft); font-size: 0.94rem; }
   .detail-cota-row{
     display:flex;
@@ -639,7 +657,20 @@
   .task span{ font-size: 0.87rem; }
   .task.done span{ color: var(--ink-soft); text-decoration: line-through; text-decoration-color: var(--line); }
 
-  .task-row{ display:flex; align-items:center; justify-content:space-between; gap: 0.5rem; }
+  .task-row{ display:flex; align-items:center; gap: 0.35rem; }
+  .task-row .task{ flex: 1 1 auto; min-width: 0; }
+  .task-drag-handle{
+    flex: 0 0 auto;
+    display:flex;
+    align-items:center;
+    color: var(--ink-soft);
+    cursor: grab;
+    touch-action: none;
+    padding: 0.15rem;
+  }
+  .task-drag-handle:hover{ color: var(--ink); }
+  .task-row.sortable-ghost{ opacity: 0.4; }
+  .task-row.sortable-chosen .task-drag-handle{ cursor: grabbing; color: var(--accent); }
   .task-remove{
     background: none;
     border: none;
@@ -946,6 +977,7 @@
   }
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.6/Sortable.min.js"></script>
 </head>
 <body>
 <div class="auth-gate" id="auth-gate">
@@ -1083,13 +1115,15 @@
   const COTA_KEY = "sellmed-eventos-2026-cota";
   const EVENT_DATE_KEY = "sellmed-eventos-2026-date-override";
   const EVENT_VENUE_KEY = "sellmed-eventos-2026-venue-override";
+  const EVENT_NAME_KEY = "sellmed-eventos-2026-name-override";
+  const TASK_ORDER_KEY = "sellmed-eventos-2026-task-order";
   const MAX_ATTACHMENT_SIZE = 3 * 1024 * 1024;
 
   const APP_STORAGE_KEYS = [
     TASKS_KEY, NOTES_KEY, CUSTOM_KEY, EXTRA_TASKS_KEY, DELETED_TASKS_KEY,
     EXTRA_CONTACTS_KEY, CONTRAPARTIDAS_KEY, LOGISTICS_KEY, CONTRACT_STATUS_TEXT_KEY,
     PAYMENT_STATUS_KEY, CREDENTIALS_KEY, EXHIBITORS_KEY, ATTACHMENTS_KEY,
-    COTA_KEY, EVENT_DATE_KEY, EVENT_VENUE_KEY
+    COTA_KEY, EVENT_DATE_KEY, EVENT_VENUE_KEY, EVENT_NAME_KEY, TASK_ORDER_KEY
   ];
 
   // ---------- cloud sync (Supabase) ----------
@@ -1144,7 +1178,8 @@
       [LOGISTICS_KEY]: logisticsState, [CONTRACT_STATUS_TEXT_KEY]: contractStatusTextState,
       [PAYMENT_STATUS_KEY]: paymentStatusState, [CREDENTIALS_KEY]: credentialsState,
       [EXHIBITORS_KEY]: exhibitorsState, [ATTACHMENTS_KEY]: attachmentsState,
-      [COTA_KEY]: cotaState, [EVENT_DATE_KEY]: eventDateState, [EVENT_VENUE_KEY]: eventVenueState
+      [COTA_KEY]: cotaState, [EVENT_DATE_KEY]: eventDateState, [EVENT_VENUE_KEY]: eventVenueState,
+      [EVENT_NAME_KEY]: eventNameState, [TASK_ORDER_KEY]: taskOrderState
     };
     let changed = false;
     data.forEach(row => {
@@ -1201,7 +1236,8 @@
     users: '<circle cx="9" cy="10" r="4"/><circle cx="16" cy="11" r="3"/>',
     notes: '<line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="14" y2="18"/>',
     download: '<line x1="12" y1="3" x2="12" y2="15"/><polyline points="7,10 12,15 17,10"/><line x1="4" y1="20" x2="20" y2="20"/>',
-    upload: '<line x1="12" y1="15" x2="12" y2="3"/><polyline points="7,8 12,3 17,8"/><line x1="4" y1="20" x2="20" y2="20"/>'
+    upload: '<line x1="12" y1="15" x2="12" y2="3"/><polyline points="7,8 12,3 17,8"/><line x1="4" y1="20" x2="20" y2="20"/>',
+    grip: '<circle cx="9" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="6" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.3" fill="currentColor" stroke="none"/><circle cx="9" cy="18" r="1.3" fill="currentColor" stroke="none"/><circle cx="15" cy="18" r="1.3" fill="currentColor" stroke="none"/>'
   };
   function icon(name){
     return `<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ""}</svg>`;
@@ -1512,6 +1548,8 @@
   const cotaState = loadJSON(COTA_KEY, {});
   const eventDateState = loadJSON(EVENT_DATE_KEY, {});
   const eventVenueState = loadJSON(EVENT_VENUE_KEY, {});
+  const eventNameState = loadJSON(EVENT_NAME_KEY, {});
+  const taskOrderState = loadJSON(TASK_ORDER_KEY, {});
 
   function saveTaskState(){ saveJSON(TASKS_KEY, taskState); }
   function saveNotesState(){ saveJSON(NOTES_KEY, notesState); }
@@ -1529,6 +1567,8 @@
   function saveCota(){ saveJSON(COTA_KEY, cotaState); }
   function saveEventDate(){ saveJSON(EVENT_DATE_KEY, eventDateState); }
   function saveEventVenue(){ saveJSON(EVENT_VENUE_KEY, eventVenueState); }
+  function saveEventName(){ saveJSON(EVENT_NAME_KEY, eventNameState); }
+  function saveTaskOrder(){ saveJSON(TASK_ORDER_KEY, taskOrderState); }
 
   function allEvents(){
     return BASE_EVENTS.concat(customEvents).sort((a, b) => getDateSort(a).localeCompare(getDateSort(b)));
@@ -1546,7 +1586,16 @@
 
   function getEventTasks(ev){
     const deleted = deletedTasksState[ev.id] || [];
-    return ev.tasks.filter(t => !deleted.includes(t.id)).concat(extraTasksState[ev.id] || []);
+    const combined = ev.tasks.filter(t => !deleted.includes(t.id)).concat(extraTasksState[ev.id] || []);
+    const order = taskOrderState[ev.id];
+    if (!order || !order.length) return combined;
+    const byId = new Map(combined.map(t => [t.id, t]));
+    const ordered = [];
+    order.forEach(id => {
+      if (byId.has(id)) { ordered.push(byId.get(id)); byId.delete(id); }
+    });
+    byId.forEach(t => ordered.push(t));
+    return ordered;
   }
 
   function getExtraContacts(ev){
@@ -1652,6 +1701,11 @@
     return ev.venue;
   }
 
+  function getEventName(ev){
+    if (Object.prototype.hasOwnProperty.call(eventNameState, ev.id)) return eventNameState[ev.id];
+    return ev.name;
+  }
+
   function renderAttachments(ev){
     const list = getAttachments(ev);
     if (!list.length) return `<p style="color:var(--ink-soft);font-size:0.85rem;margin:0;">Nenhum arquivo anexado.</p>`;
@@ -1693,7 +1747,8 @@
     return tasks.map(t => {
       const done = isDone(t);
       return `
-        <li class="task-row">
+        <li class="task-row" data-task-id="${t.id}">
+          <span class="task-drag-handle" aria-hidden="true">${icon("grip")}</span>
           <label class="task${done ? " done" : ""}" data-task="${t.id}">
             <input type="checkbox" ${done ? "checked" : ""} data-task-input="${t.id}" />
             <span>${escapeHtml(t.label)}</span>
@@ -1873,6 +1928,10 @@
     if (venueInput) eventVenueState[ev.id] = venueInput.value;
     saveEventVenue();
 
+    const nameInputEl = container.querySelector("[data-event-name-input]");
+    if (nameInputEl && nameInputEl.value.trim()) eventNameState[ev.id] = nameInputEl.value.trim();
+    saveEventName();
+
     const startInput = container.querySelector("[data-event-date-start]");
     const endInput = container.querySelector("[data-event-date-end]");
     if (startInput && startInput.value) {
@@ -1891,6 +1950,35 @@
       saveBtn.classList.add("is-saved");
       setTimeout(() => saveBtn.classList.remove("is-saved"), 1200);
     });
+
+    const nameInput = container.querySelector("[data-event-name-input]");
+    if (nameInput) {
+      let debounce;
+      const persist = () => {
+        const value = nameInput.value.trim();
+        if (!value) return;
+        eventNameState[ev.id] = value;
+        saveEventName();
+        document.title = value + " — Sellmed";
+      };
+      nameInput.addEventListener("input", () => { clearTimeout(debounce); debounce = setTimeout(persist, 400); });
+      nameInput.addEventListener("blur", persist);
+    }
+
+    const taskListEl = container.querySelector(".task-list");
+    if (taskListEl && window.Sortable) {
+      Sortable.create(taskListEl, {
+        handle: ".task-drag-handle",
+        animation: 150,
+        ghostClass: "sortable-ghost",
+        chosenClass: "sortable-chosen",
+        onEnd: () => {
+          const order = Array.from(taskListEl.querySelectorAll("[data-task-id]")).map(li => li.getAttribute("data-task-id"));
+          taskOrderState[ev.id] = order;
+          saveTaskOrder();
+        }
+      });
+    }
 
     container.querySelectorAll("[data-task-input]").forEach(input => {
       input.addEventListener("change", () => {
@@ -2164,7 +2252,7 @@
             ${urgent ? `<span class="pill pill--urgent">${d === 0 ? "hoje" : d + "d"}</span>` : ""}
           </span>
         </div>
-        <h2 class="card-name">${escapeHtml(ev.name)}</h2>
+        <h2 class="card-name">${escapeHtml(getEventName(ev))}</h2>
         <p class="card-meta">${escapeHtml(ev.society)}${ev.city && ev.city !== "A definir" ? " · " + escapeHtml(ev.city) : ""}</p>
         ${total ? `<div class="card-progress"><div class="card-progress-fill" style="width:${pct}%"></div></div>` : ""}
         <div class="card-bottom">
@@ -2202,7 +2290,7 @@
     const openTasks = events.reduce((s, e) => s + getEventTasks(e).filter(t => !isDone(t)).length, 0);
 
     const tiles = [
-      { icon: "calendar", label: "Próximo evento", value: next.name, sub: nextDays === 0 ? "é hoje" : nextDays > 0 ? `em ${nextDays} dia${nextDays === 1 ? "" : "s"}` : "em andamento", urgent: nextDays >= 0 && nextDays <= 14 },
+      { icon: "calendar", label: "Próximo evento", value: getEventName(next), sub: nextDays === 0 ? "é hoje" : nextDays > 0 ? `em ${nextDays} dia${nextDays === 1 ? "" : "s"}` : "em andamento", urgent: nextDays >= 0 && nextDays <= 14 },
       { icon: "coins", label: "Investimento confirmado", value: fmtBRL(confirmedSum), sub: `${cotasDefined} de ${events.length} cotas definidas` },
       { icon: "alert", label: "Pagamentos pendentes", value: String(paymentsPending), sub: "cota ainda não paga" },
       { icon: "check", label: "Tarefas em aberto", value: String(openTasks), sub: "entre todos os eventos" }
@@ -2237,7 +2325,7 @@
       const term = dashboardFilter.term.toLowerCase().trim();
       const status = dashboardFilter.status;
       const filtered = events.filter(ev => {
-        const matchesTerm = !term || (ev.name + " " + ev.society + " " + ev.city).toLowerCase().includes(term);
+        const matchesTerm = !term || (getEventName(ev) + " " + ev.society + " " + ev.city).toLowerCase().includes(term);
         const matchesStatus = status === "all" || computeStatus(ev) === status;
         return matchesTerm && matchesStatus;
       });
@@ -2291,7 +2379,7 @@
     }
 
     currentDetailEv = ev;
-    document.title = ev.name + " — Sellmed";
+    document.title = getEventName(ev) + " — Sellmed";
     const status = computeStatus(ev);
     const d = daysUntil(getDateSort(ev));
     const urgent = d >= 0 && d <= 14;
@@ -2315,7 +2403,7 @@
               ${urgent ? `<span class="pill pill--urgent">${d === 0 ? "hoje" : d + "d"}</span>` : ""}
             </span>
           </div>
-          <h1 class="detail-name">${escapeHtml(ev.name)}</h1>
+          <input type="text" class="detail-name-input" data-event-name-input value="${escapeHtml(getEventName(ev))}" placeholder="Nome do evento" />
           <p class="detail-meta">${escapeHtml(ev.society)} · ${escapeHtml(ev.city)} · <input type="text" class="detail-venue-input" data-venue-input value="${escapeHtml(venueValue)}" placeholder="Local do evento" /></p>
           <div class="detail-cota-row">
             <span class="detail-cota-prefix">R$</span>
