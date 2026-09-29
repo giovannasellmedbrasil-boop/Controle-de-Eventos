@@ -885,6 +885,44 @@
   }
   .btn-delete:hover{ background: var(--critical-bg); }
 
+  /* ---------- event plan (checklist por fase) ---------- */
+  .plan-open{ display:flex; align-items:center; justify-content:space-between; gap:0.8rem; flex-wrap:wrap;
+    padding:0.85rem 1rem; border:1px solid var(--mint-line); background:var(--mint); border-radius:10px; margin-bottom:0.9rem; }
+  .plan-open-text{ display:grid; gap:0.15rem; min-width:0; }
+  .plan-open-text strong{ font-size:0.95rem; color:var(--ink); }
+  .plan-open-text span{ font-size:0.8rem; color:var(--ink-soft); }
+  dialog#plan-dialog{ border:none; border-radius:16px; padding:0; background:var(--paper); color:var(--ink);
+    width:min(760px, 94vw); max-height:90vh; overflow:auto; }
+  dialog#plan-dialog::backdrop{ background: rgba(8, 12, 14, 0.55); }
+  .plan-head{ position:sticky; top:0; z-index:2; background:var(--paper); padding:1.1rem 1.3rem 0.8rem; border-bottom:1px solid var(--line); display:grid; gap:0.55rem; }
+  .plan-head-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:0.8rem; }
+  .plan-head h2{ font-family:var(--font-display); font-weight:800; text-transform:uppercase; font-size:1.05rem; margin:0; letter-spacing:0.01em; }
+  .plan-close{ border:1px solid var(--line); background:var(--surface); color:var(--ink); border-radius:8px; width:2.1rem; height:2.1rem; font-size:1.2rem; cursor:pointer; flex:none; }
+  .plan-body{ padding:1rem 1.3rem 1.6rem; display:grid; gap:1.4rem; }
+  .plan-phase{ display:grid; gap:0.7rem; }
+  .plan-phase-head{ display:flex; align-items:baseline; gap:0.6rem; flex-wrap:wrap; }
+  .plan-phase-head h3{ margin:0; font-size:1rem; }
+  .plan-date{ font-size:0.72rem; padding:0.18rem 0.55rem; border-radius:999px; background:var(--mint); color:var(--accent-ink); white-space:nowrap; }
+  .plan-date.urgent{ background:var(--critical-bg); color:var(--critical); }
+  .plan-task{ background:var(--surface); border:1px solid var(--line); border-radius:10px; padding:0.8rem 0.95rem; display:grid; gap:0.6rem; }
+  .plan-task.done{ opacity:0.6; }
+  .plan-task.done .plan-title{ text-decoration:line-through; }
+  .plan-task-head{ display:grid; grid-template-columns:auto 1fr; gap:0.7rem; align-items:start; }
+  .plan-task-head > div{ min-width:0; display:grid; gap:0.3rem; }
+  .plan-title{ font-weight:700; font-size:0.93rem; line-height:1.35; }
+  .plan-tags{ display:flex; flex-wrap:wrap; gap:0.35rem; }
+  .plan-tag{ font-size:0.68rem; padding:0.1rem 0.45rem; border-radius:4px; border:1px solid var(--line); color:var(--ink-soft); }
+  .plan-tag.dep{ border-color:transparent; background:var(--warn-bg); color:var(--warn); }
+  .plan-tag.who{ border-color:transparent; background:var(--good-bg); color:var(--good); }
+  .plan-note{ margin:0; font-size:0.82rem; color:var(--ink-soft); }
+  .plan-alert{ border:1px solid var(--critical); background:var(--critical-bg); border-radius:8px; padding:0.6rem 0.75rem; font-size:0.82rem; }
+  .plan-alert strong{ color:var(--critical); }
+  .plan-subs{ list-style:none; margin:0; padding:0 0 0 1.9rem; display:grid; gap:0.4rem; }
+  .plan-subs label{ display:flex; gap:0.55rem; align-items:flex-start; font-size:0.85rem; cursor:pointer; }
+  .plan-subs input:checked + span{ text-decoration:line-through; color:var(--ink-soft); }
+  .plan-task input[type=checkbox]{ width:1.15rem; height:1.15rem; margin:0.1rem 0 0; accent-color:var(--accent); cursor:pointer; flex:none; }
+  .plan-subs input[type=checkbox]{ width:1rem; height:1rem; }
+
   /* ---------- new-event dialog ---------- */
   dialog#event-form-dialog{
     border: none;
@@ -1094,6 +1132,7 @@
     </form>
   </div>
 </dialog>
+<dialog id="plan-dialog" aria-label="Checklist do evento"></dialog>
 
 <script>
 (function(){
@@ -1518,50 +1557,362 @@
       standInfo: "Stand com banner de fundo (fotos e nomes dos produtos) e TV com vídeo",
       giveaways: "A definir",
       material: "A produzir — flyers dos produtos do banner, folder ShockFast (pendente Regulatório), vídeo",
-      tasks: [
-        { id: "pci-cto-01", label: "30/09 · Contrato: cobrar da organização o contrato (stand + apoio ao Live Case in a Box 3)" },
-        { id: "pci-cto-02", label: "30/09 · Contrato: receber e passar para assinatura" },
-        { id: "pci-cto-03", label: "30/09 · Recibo: receber recibo/nota e enviar ao financeiro com vencimento" },
-        { id: "pci-cto-04", label: "30/09 · Banner: fechar lista de produtos (Elong, Anyreach, Expressman, March/Orien, Vesselin, GuReater, Partner, Vesscide, NC Tadpole, Conqueror, Mini Tadpole)" },
-        { id: "pci-cto-05", label: "30/09 · Banner: separar fotos em alta e logos (Sellmed + APT Medical)" },
-        { id: "pci-cto-06", label: "30/09 · Banner: pedir medidas e formato do arquivo à organização/montadora" },
-        { id: "pci-cto-07", label: "30/09 · Banner: aprovar a arte internamente" },
-        { id: "pci-cto-08", label: "30/09 · Banner: enviar arquivo final" },
-        { id: "pci-cto-09", label: "30/09 · Expositores: confirmar os 5 nomes com a gestão" },
-        { id: "pci-cto-10", label: "30/09 · Expositores: pegar link/acesso da área do expositor no site do evento" },
-        { id: "pci-cto-11", label: "30/09 · Expositores: juntar dados da credencial (nome, CPF, e-mail, empresa)" },
-        { id: "pci-cto-12", label: "30/09 · Expositores: cadastrar os 5 no site e salvar a confirmação" },
-        { id: "pci-cto-13", label: "02/10 · Médicos: pedir indicações ao time comercial por região" },
-        { id: "pci-cto-14", label: "02/10 · Médicos: confirmar os 10 nomes e disponibilidade" },
-        { id: "pci-cto-15", label: "02/10 · Médicos: definir o que a Sellmed cobre (inscrição, passagem, hotel) e validar com compliance" },
-        { id: "pci-cto-16", label: "02/10 · Médicos: fazer inscrições e logística" },
-        { id: "pci-cto-17", label: "02/10 · ShockFast: confirmar com o Regulatório se há registro ANVISA com indicação coronária (catálogo indica só periférico)" },
-        { id: "pci-cto-18", label: "02/10 · Simpósios: confirmar os 2 simpósios (Live Case in a Box 3 · 18/10 13h10 e Live Case 12 APT · 19/10 15h55)" },
-        { id: "pci-cto-19", label: "02/10 · Simpósios: confirmar com a APT o uso do nome no convite" },
-        { id: "pci-cto-20", label: "02/10 · Simpósios: criar convites/flyers dos 2 simpósios" },
-        { id: "pci-cto-21", label: "02/10 · Simpósios: aprovar artes e disparar convites aos médicos" },
-        { id: "pci-cto-22", label: "07/10 · Flyers: listar flyers existentes e os que faltam (produtos do banner)" },
-        { id: "pci-cto-23", label: "07/10 · Flyers: atualizar/criar os que faltam, com registro ANVISA de cada produto" },
-        { id: "pci-cto-24", label: "07/10 · Flyers: definir quantidades e enviar para impressão" },
-        { id: "pci-cto-25", label: "07/10 · Folder ShockFast coronário: só seguir se houver registro coronário na ANVISA" },
-        { id: "pci-cto-26", label: "07/10 · Folder ShockFast: reunir dados técnicos e estudos da indicação aprovada" },
-        { id: "pci-cto-27", label: "07/10 · Folder ShockFast: diagramar e aprovar com Regulatório/Marketing" },
-        { id: "pci-cto-28", label: "07/10 · Folder ShockFast: enviar para impressão" },
-        { id: "pci-cto-29", label: "07/10 · Logística expositores: passagens (chegada 17/10 para montagem)" },
-        { id: "pci-cto-30", label: "07/10 · Logística expositores: hotel e transfer" },
-        { id: "pci-cto-31", label: "07/10 · Logística expositores: credenciais, uniforme e escala do stand" },
-        { id: "pci-cto-32", label: "07/10 · Logística expositores: envio de flyers, folders e amostras ao local" },
-        { id: "pci-cto-33", label: "07/10 · Digital: calendário de posts (save the date, produtos, simpósios, contagem regressiva, cobertura ao vivo, pós-evento)" },
-        { id: "pci-cto-34", label: "07/10 · Digital: criar artes e legendas" },
-        { id: "pci-cto-35", label: "07/10 · Digital: agendar posts nas redes" },
-        { id: "pci-cto-36", label: "09/10 · Vídeo TV do stand: usar produtos/fotos do banner e pedir vídeos à APT" },
-        { id: "pci-cto-37", label: "09/10 · Vídeo TV do stand: roteiro em loop de 1–2 min, sem áudio, com legendas" },
-        { id: "pci-cto-38", label: "09/10 · Vídeo TV do stand: confirmar tamanho da TV, entrada (USB/HDMI) e formato" },
-        { id: "pci-cto-39", label: "09/10 · Vídeo TV do stand: aprovar e testar no pen drive" },
-        { id: "pci-cto-40", label: "13/10 · Apresentação time: agenda, sessões-chave e horários dos simpósios" },
-        { id: "pci-cto-41", label: "13/10 · Apresentação time: produtos prioritários, mensagens-chave e concorrentes" },
-        { id: "pci-cto-42", label: "13/10 · Apresentação time: escala do stand, médicos convidados e logística" },
-        { id: "pci-cto-43", label: "13/10 · Apresentação time: apresentar ao time" }
+      tasks: [],
+      plan: [
+        {
+          "title": "Agora",
+          "date": "até qua, 30/09",
+          "urgent": true,
+          "tasks": [
+            {
+              "id": "cto-t-banner",
+              "title": "Arte do banner de fundo do stand (fotos + nomes dos produtos) e enviar",
+              "tags": [
+                {
+                  "text": "Prazo 30/09",
+                  "kind": ""
+                },
+                {
+                  "text": "Define os flyers e o vídeo",
+                  "kind": "who"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-banner-1",
+                  "label": "Fechar a lista de produtos. Sugestão: Elong, Anyreach, Expressman, March/Orien, Vesselin, GuReater, Partner, Vesscide, NC Tadpole, Conqueror, Mini Tadpole"
+                },
+                {
+                  "id": "cto-banner-2",
+                  "label": "Separar fotos em alta resolução e logos (Sellmed + APT Medical)"
+                },
+                {
+                  "id": "cto-banner-3",
+                  "label": "Pedir à organização/montadora as medidas e o formato do arquivo"
+                },
+                {
+                  "id": "cto-banner-4",
+                  "label": "Aprovar a arte internamente"
+                },
+                {
+                  "id": "cto-banner-5",
+                  "label": "Enviar o arquivo final"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-expositores",
+              "title": "Cadastrar os 5 expositores (credenciais) no site do evento",
+              "tags": [
+                {
+                  "text": "Prazo 30/09",
+                  "kind": ""
+                },
+                {
+                  "text": "Libera a logística",
+                  "kind": "who"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-expositores-1",
+                  "label": "Confirmar os 5 nomes com a gestão"
+                },
+                {
+                  "id": "cto-expositores-2",
+                  "label": "Pegar com a organização o link e o acesso da área do expositor"
+                },
+                {
+                  "id": "cto-expositores-3",
+                  "label": "Coletar os dados que o site pede (nome da credencial, CPF, e-mail, empresa)"
+                },
+                {
+                  "id": "cto-expositores-4",
+                  "label": "Cadastrar os 5 no site e salvar o print ou e-mail de confirmação"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-contrato",
+              "title": "Cobrar da organização o contrato e o recibo para pagamento",
+              "tags": [
+                {
+                  "text": "Começar hoje",
+                  "kind": ""
+                }
+              ],
+              "note": "Contrato e pagamento pendentes costumam travar a liberação do stand e das credenciais.",
+              "subs": [
+                {
+                  "id": "cto-contrato-1",
+                  "label": "Enviar a cobrança (contrato do stand + apoio ao Live Case in a Box 3)"
+                },
+                {
+                  "id": "cto-contrato-2",
+                  "label": "Receber o contrato e passar para assinatura"
+                },
+                {
+                  "id": "cto-contrato-3",
+                  "label": "Receber o recibo/nota e encaminhar ao financeiro com a data de vencimento"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Esta semana",
+          "date": "até sex, 02/10",
+          "tasks": [
+            {
+              "id": "cto-t-medicos",
+              "title": "Levantar os nomes dos 10 médicos convidados",
+              "tags": [
+                {
+                  "text": "Prazo sugerido",
+                  "kind": ""
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-medicos-1",
+                  "label": "Pedir indicações ao time comercial por região"
+                },
+                {
+                  "id": "cto-medicos-2",
+                  "label": "Confirmar os 10 nomes e a disponibilidade de cada um"
+                },
+                {
+                  "id": "cto-medicos-3",
+                  "label": "Definir o que a Sellmed cobre (inscrição, passagem, hotel) e validar com compliance"
+                },
+                {
+                  "id": "cto-medicos-4",
+                  "label": "Fazer as inscrições e a logística dos médicos"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-shockfast-check",
+              "title": "Confirmar com o Regulatório a indicação coronária do ShockFast",
+              "tags": [
+                {
+                  "text": "Antes do folder",
+                  "kind": "dep"
+                }
+              ],
+              "alert": "No catálogo, o ShockFast aparece indicado só para lesões calcificadas periféricas, e não há registro coronário público na ANVISA (a versão coronária tem CE desde 05/2025). Sem registro coronário, o folder seria promoção fora da indicação.",
+              "subs": []
+            },
+            {
+              "id": "cto-t-simposios",
+              "title": "Convites/flyers dos 2 simpósios",
+              "tags": [
+                {
+                  "text": "Prazo sugerido",
+                  "kind": ""
+                },
+                {
+                  "text": "Base da comunicação digital",
+                  "kind": "who"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-simposios-1",
+                  "label": "18/10, 13h10–13h50 · Live Case in a Box 3: PCI híbrida DCB + DES (Sellmed). Aula: Fabio Sândoli de Brito Jr; operador: Eduardo Santos da Silveira, IC Porto Alegre"
+                },
+                {
+                  "id": "cto-simposios-2",
+                  "label": "19/10, 15h55–17h10 · Live Case 12 Grand Finale: CTO complexo (APT Medical). Operador: João Eduardo Tinoco de Paula, Hospital Rio Grande, Natal"
+                },
+                {
+                  "id": "cto-simposios-3",
+                  "label": "Confirmar se são esses os 2 simpósios e se a APT aprova o uso do nome no convite"
+                },
+                {
+                  "id": "cto-simposios-4",
+                  "label": "Aprovar as artes e disparar os convites para os médicos-alvo"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Próxima semana",
+          "date": "até qua, 07/10",
+          "tasks": [
+            {
+              "id": "cto-t-flyers",
+              "title": "Organizar os flyers de todos os produtos que estão no banner",
+              "tags": [
+                {
+                  "text": "Depende do banner",
+                  "kind": "dep"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-flyers-1",
+                  "label": "Listar os flyers que já existem e os que faltam"
+                },
+                {
+                  "id": "cto-flyers-2",
+                  "label": "Atualizar ou criar os que faltam, com o registro ANVISA de cada produto"
+                },
+                {
+                  "id": "cto-flyers-3",
+                  "label": "Definir a quantidade e enviar para impressão"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-video",
+              "title": "Vídeo dos principais produtos para a TV do stand",
+              "tags": [
+                {
+                  "text": "Depende do banner",
+                  "kind": "dep"
+                },
+                {
+                  "text": "Prazo sugerido 09/10",
+                  "kind": ""
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-video-1",
+                  "label": "Usar os mesmos produtos e fotos do banner; pedir à APT vídeos e animações que já existam"
+                },
+                {
+                  "id": "cto-video-2",
+                  "label": "Roteiro em loop de 1 a 2 minutos, sem áudio, com legendas e o nome de cada produto"
+                },
+                {
+                  "id": "cto-video-3",
+                  "label": "Confirmar com a organização o tamanho da TV, a entrada (USB/HDMI) e o formato do arquivo"
+                },
+                {
+                  "id": "cto-video-4",
+                  "label": "Aprovar e testar o arquivo num pen drive antes da viagem"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-folder",
+              "title": "Criar o folder do ShockFast coronário",
+              "tags": [
+                {
+                  "text": "Depende do Regulatório",
+                  "kind": "dep"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-folder-1",
+                  "label": "Reunir dados técnicos e estudos que suportam a indicação aprovada"
+                },
+                {
+                  "id": "cto-folder-2",
+                  "label": "Diagramar e aprovar com o Regulatório/Marketing"
+                },
+                {
+                  "id": "cto-folder-3",
+                  "label": "Enviar para impressão"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-logistica",
+              "title": "Logística dos 5 expositores",
+              "tags": [
+                {
+                  "text": "Depende do cadastro (30/09)",
+                  "kind": "dep"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-logistica-1",
+                  "label": "Passagens (chegada no dia 17/10 para a montagem)"
+                },
+                {
+                  "id": "cto-logistica-2",
+                  "label": "Hotel perto do local e transfer"
+                },
+                {
+                  "id": "cto-logistica-3",
+                  "label": "Credenciais, uniforme e escala de horários no stand"
+                },
+                {
+                  "id": "cto-logistica-4",
+                  "label": "Envio do material (flyers, folders, amostras) para o local"
+                }
+              ]
+            },
+            {
+              "id": "cto-t-digital",
+              "title": "Comunicação digital do evento e dos simpósios",
+              "tags": [
+                {
+                  "text": "Depende dos convites",
+                  "kind": "dep"
+                },
+                {
+                  "text": "Posts de 07 a 20/10",
+                  "kind": ""
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-digital-1",
+                  "label": "Montar o calendário de posts: save the date, produtos, simpósios, contagem regressiva, cobertura ao vivo e pós-evento"
+                },
+                {
+                  "id": "cto-digital-2",
+                  "label": "Criar as artes e as legendas"
+                },
+                {
+                  "id": "cto-digital-3",
+                  "label": "Agendar os posts nas redes"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "title": "Antes do evento",
+          "date": "até ter, 13/10",
+          "tasks": [
+            {
+              "id": "cto-t-apresentacao",
+              "title": "Montar a apresentação para o time com as informações do evento",
+              "tags": [
+                {
+                  "text": "Fecha tudo acima",
+                  "kind": "dep"
+                }
+              ],
+              "subs": [
+                {
+                  "id": "cto-apresentacao-1",
+                  "label": "Agenda, sessões-chave e horários dos simpósios"
+                },
+                {
+                  "id": "cto-apresentacao-2",
+                  "label": "Produtos prioritários, mensagens-chave e concorrentes presentes"
+                },
+                {
+                  "id": "cto-apresentacao-3",
+                  "label": "Escala do stand, médicos convidados e logística"
+                },
+                {
+                  "id": "cto-apresentacao-4",
+                  "label": "Apresentar ao time"
+                }
+              ]
+            }
+          ]
+        }
       ],
       contacts: [],
       notes: ""
@@ -1642,6 +1993,111 @@
     byId.forEach(t => ordered.push(t));
     return ordered;
   }
+
+  function planTasks(ev){
+    return (ev.plan || []).reduce((acc, ph) => acc.concat(ph.tasks.map(t => ({ id: t.id, label: t.title }))), []);
+  }
+  function planItemIds(ev){
+    return (ev.plan || []).reduce((acc, ph) => {
+      ph.tasks.forEach(t => { acc.push(t.id); t.subs.forEach(sb => acc.push(sb.id)); });
+      return acc;
+    }, []);
+  }
+  function getProgressTasks(ev){
+    return getEventTasks(ev).concat(planTasks(ev));
+  }
+  function planButtonHTML(ev){
+    const ids = planItemIds(ev);
+    const doneItems = ids.filter(id => !!taskState[id]).length;
+    const main = planTasks(ev);
+    const doneMain = main.filter(isDone).length;
+    return `
+      <div class="plan-open">
+        <div class="plan-open-text">
+          <strong>Checklist do evento por prazo</strong>
+          <span data-plan-summary>${doneMain} de ${main.length} tarefas · ${doneItems} de ${ids.length} itens marcados</span>
+        </div>
+        <button type="button" class="btn-add-inline" data-open-plan>Abrir checklist</button>
+      </div>`;
+  }
+  function planDialogHTML(ev){
+    const main = planTasks(ev);
+    const doneMain = main.filter(isDone).length;
+    const pct = main.length ? Math.round(doneMain / main.length * 100) : 0;
+    const tagsHTML = t => t.tags.map(g => `<span class="plan-tag${g.kind ? " " + g.kind : ""}">${escapeHtml(g.text)}</span>`).join("");
+    const phases = ev.plan.map(ph => `
+      <section class="plan-phase">
+        <div class="plan-phase-head"><h3>${escapeHtml(ph.title)}</h3><span class="plan-date${ph.urgent ? " urgent" : ""}">${escapeHtml(ph.date)}</span></div>
+        ${ph.tasks.map(t => {
+          const done = isDone(t);
+          return `
+          <div class="plan-task${done ? " done" : ""}" data-plan-task="${t.id}">
+            <div class="plan-task-head">
+              <input type="checkbox" data-plan-input="${t.id}" ${done ? "checked" : ""} aria-label="${escapeHtml(t.title)}" />
+              <div><div class="plan-title">${escapeHtml(t.title)}</div><div class="plan-tags">${tagsHTML(t)}</div></div>
+            </div>
+            ${t.alert ? `<div class="plan-alert"><strong>Atenção:</strong> ${escapeHtml(t.alert)}</div>` : ""}
+            ${t.note ? `<p class="plan-note">${escapeHtml(t.note)}</p>` : ""}
+            ${t.subs.length ? `<ul class="plan-subs">${t.subs.map(sb => `
+              <li><label><input type="checkbox" data-plan-input="${sb.id}" ${taskState[sb.id] ? "checked" : ""} /><span>${escapeHtml(sb.label)}</span></label></li>`).join("")}</ul>` : ""}
+          </div>`;
+        }).join("")}
+      </section>`).join("");
+    return `
+      <div class="plan-head">
+        <div class="plan-head-top">
+          <h2>${escapeHtml(getEventName(ev))}</h2>
+          <button type="button" class="plan-close" data-close-plan aria-label="Fechar">×</button>
+        </div>
+        <div class="progress-wrap">
+          <div class="progress-label" data-plan-progress-label><span>${doneMain}/${main.length} tarefas concluídas</span><span>${pct}%</span></div>
+          <div class="progress-bar"><div class="progress-fill" data-plan-progress-fill style="width:${pct}%"></div></div>
+        </div>
+      </div>
+      <div class="plan-body">${phases}</div>`;
+  }
+  function refreshDetailProgress(ev){
+    const detail = document.querySelector(".event-detail");
+    if (!detail) return;
+    const tasks = getProgressTasks(ev);
+    const doneCount = tasks.filter(isDone).length;
+    const totalCount = tasks.length;
+    const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 100;
+    const label = detail.querySelector(".full-block .progress-label");
+    const fill = detail.querySelector(".full-block .progress-fill");
+    if (label) label.innerHTML = `<span>${doneCount}/${totalCount} concluídas</span><span>${pct}%</span>`;
+    if (fill) fill.style.width = pct + "%";
+    const summary = detail.querySelector("[data-plan-summary]");
+    if (summary && ev.plan){
+      const ids = planItemIds(ev);
+      const main = planTasks(ev);
+      summary.textContent = `${main.filter(isDone).length} de ${main.length} tarefas · ${ids.filter(id => !!taskState[id]).length} de ${ids.length} itens marcados`;
+    }
+  }
+  function openPlan(ev){
+    const dlg = document.getElementById("plan-dialog");
+    dlg.innerHTML = planDialogHTML(ev);
+    dlg.querySelector("[data-close-plan]").addEventListener("click", () => dlg.close());
+    dlg.querySelectorAll("[data-plan-input]").forEach(input => {
+      input.addEventListener("change", () => {
+        const id = input.getAttribute("data-plan-input");
+        taskState[id] = input.checked;
+        saveTaskState();
+        const card = dlg.querySelector(`[data-plan-task="${id}"]`);
+        if (card) card.classList.toggle("done", input.checked);
+        const main = planTasks(ev);
+        const doneMain = main.filter(isDone).length;
+        const pct = main.length ? Math.round(doneMain / main.length * 100) : 0;
+        dlg.querySelector("[data-plan-progress-label]").innerHTML = `<span>${doneMain}/${main.length} tarefas concluídas</span><span>${pct}%</span>`;
+        dlg.querySelector("[data-plan-progress-fill]").style.width = pct + "%";
+        refreshDetailProgress(ev);
+      });
+    });
+    dlg.showModal();
+  }
+  document.getElementById("plan-dialog").addEventListener("click", (e) => {
+    if (e.target.id === "plan-dialog") e.target.close();
+  });
 
   function getExtraContacts(ev){
     return extraContactsState[ev.id] || [];
@@ -1788,7 +2244,7 @@
 
   function renderTasks(ev){
     const tasks = getEventTasks(ev);
-    if (!tasks.length) return `<li style="color:var(--ink-soft)">Nenhuma tarefa cadastrada.</li>`;
+    if (!tasks.length) return ev.plan ? "" : `<li style="color:var(--ink-soft)">Nenhuma tarefa cadastrada.</li>`;
     return tasks.map(t => {
       const done = isDone(t);
       return `
@@ -1838,7 +2294,7 @@
   }
 
   function eventDetailGrid(ev){
-    const tasks = getEventTasks(ev);
+    const tasks = getProgressTasks(ev);
     const done = tasks.filter(isDone).length;
     const total = tasks.length;
     const pct = total ? Math.round((done / total) * 100) : 100;
@@ -1896,6 +2352,7 @@
             <div class="progress-label"><span>${done}/${total} concluídas</span><span>${pct}%</span></div>
             <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
           </div>
+          ${ev.plan ? planButtonHTML(ev) : ""}
           <ul class="task-list">${renderTasks(ev)}</ul>
           <div class="add-row">
             <input type="text" class="add-input" data-add-task-input placeholder="Nova atividade…" />
@@ -2025,6 +2482,9 @@
       });
     }
 
+    const openPlanBtn = container.querySelector("[data-open-plan]");
+    if (openPlanBtn) openPlanBtn.addEventListener("click", () => openPlan(ev));
+
     container.querySelectorAll("[data-task-input]").forEach(input => {
       input.addEventListener("change", () => {
         const id = input.getAttribute("data-task-input");
@@ -2032,7 +2492,7 @@
         saveTaskState();
         input.closest(".task").classList.toggle("done", input.checked);
         const detail = container.querySelector(".event-detail");
-        const tasks = getEventTasks(ev);
+        const tasks = getProgressTasks(ev);
         const doneCount = tasks.filter(isDone).length;
         const totalCount = tasks.length;
         const pct = totalCount ? Math.round((doneCount / totalCount) * 100) : 100;
@@ -2281,7 +2741,7 @@
 
   function cardHTML(ev){
     const status = computeStatus(ev);
-    const tasks = getEventTasks(ev);
+    const tasks = getProgressTasks(ev);
     const done = tasks.filter(isDone).length;
     const total = tasks.length;
     const pct = total ? Math.round((done / total) * 100) : 0;
@@ -2332,7 +2792,7 @@
     const confirmedSum = events.reduce((s, e) => s + (getCota(e) || 0), 0);
     const cotasDefined = events.filter(e => getCota(e) != null).length;
     const paymentsPending = events.filter(e => getCota(e) != null && getPaymentStatus(e) !== "pago").length;
-    const openTasks = events.reduce((s, e) => s + getEventTasks(e).filter(t => !isDone(t)).length, 0);
+    const openTasks = events.reduce((s, e) => s + getProgressTasks(e).filter(t => !isDone(t)).length, 0);
 
     const tiles = [
       { icon: "calendar", label: "Próximo evento", value: getEventName(next), sub: nextDays === 0 ? "é hoje" : nextDays > 0 ? `em ${nextDays} dia${nextDays === 1 ? "" : "s"}` : "em andamento", urgent: nextDays >= 0 && nextDays <= 14 },
