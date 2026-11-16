@@ -41,6 +41,10 @@
     --mint: #e8f6f4;
     --mint-line: #cdece7;
     --logo-chip-bg: transparent;
+    --radius-lg: 16px;
+    --shadow-card: 0 1px 2px rgba(12,58,94,0.05), 0 10px 24px -16px rgba(12,58,94,0.22);
+    --shadow-hover: 0 1px 2px rgba(12,58,94,0.06), 0 16px 32px -14px rgba(12,58,94,0.28);
+    --shadow-pop: 0 18px 44px -14px rgba(12,58,94,0.32);
 
     --font-display: Arial, sans-serif;
     --font-body: Arial, sans-serif;
@@ -72,6 +76,9 @@
       --mint: #12302c;
       --mint-line: #1f4a43;
       --logo-chip-bg: #eef2f3;
+      --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 10px 24px -16px rgba(0,0,0,0.55);
+      --shadow-hover: 0 1px 2px rgba(0,0,0,0.35), 0 16px 32px -14px rgba(0,0,0,0.6);
+      --shadow-pop: 0 18px 44px -14px rgba(0,0,0,0.65);
     }
   }
   :root[data-theme="dark"]{
@@ -81,6 +88,9 @@
     --warn: #d3a15a; --warn-bg: #332a18; --unknown: #93a4ac; --unknown-bg: #1c2930;
     --critical: #e08672; --critical-bg: #34211d; --done: #9db4c4; --done-bg: #223038;
     --mint: #12302c; --mint-line: #1f4a43; --logo-chip-bg: #eef2f3;
+    --shadow-card: 0 1px 2px rgba(0,0,0,0.3), 0 10px 24px -16px rgba(0,0,0,0.55);
+    --shadow-hover: 0 1px 2px rgba(0,0,0,0.35), 0 16px 32px -14px rgba(0,0,0,0.6);
+    --shadow-pop: 0 18px 44px -14px rgba(0,0,0,0.65);
   }
   :root[data-theme="light"]{
     --paper: #ffffff; --surface: #ffffff; --ink: #0f2a3d; --ink-soft: #5c6b76; --line: #e1e6e8;
@@ -89,6 +99,9 @@
     --warn: #a3631c; --warn-bg: #f4e6cf; --unknown: #6b7580; --unknown-bg: #e4e6ea;
     --critical: #a8402f; --critical-bg: #f6ded8; --done: #4a6178; --done-bg: #e6eaee;
     --mint: #e8f6f4; --mint-line: #cdece7; --logo-chip-bg: transparent;
+    --shadow-card: 0 1px 2px rgba(12,58,94,0.05), 0 10px 24px -16px rgba(12,58,94,0.22);
+    --shadow-hover: 0 1px 2px rgba(12,58,94,0.06), 0 16px 32px -14px rgba(12,58,94,0.28);
+    --shadow-pop: 0 18px 44px -14px rgba(12,58,94,0.32);
   }
 
   *{ box-sizing: border-box; }
@@ -158,17 +171,17 @@
     display:flex;
     align-items:center;
     justify-content:center;
-    width: 42px;
-    height: 42px;
-    border-radius: 10px;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
     background: var(--logo-chip-bg, transparent);
   }
-  .logo-icon{ display:block; width: 34px; height: 35px; object-fit: contain; }
+  .logo-icon{ display:block; width: 39px; height: 40px; object-fit: contain; }
   .brand-word{ display:flex; flex-direction:column; gap: 0.2rem; }
   .brand-name{
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     letter-spacing: 0.01em;
     line-height: 1;
     background: linear-gradient(90deg, var(--brand-navy) 0%, var(--brand-teal) 60%, var(--brand-green) 100%);
@@ -227,7 +240,10 @@
     gap: 0.55rem;
     min-width: 0;
     overflow: hidden;
+    box-shadow: var(--shadow-card);
+    transition: box-shadow 0.15s ease, transform 0.15s ease;
   }
+  .stat:hover{ box-shadow: var(--shadow-hover); transform: translateY(-1px); }
   .stat::before{
     content: '';
     position: absolute;
@@ -328,8 +344,10 @@
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
+    box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   }
-  .btn-add:hover{ background: var(--accent-ink); }
+  .btn-add:hover{ background: var(--accent-ink); transform: translateY(-1px); }
   .btn-backup{
     display:inline-flex;
     align-items:center;
@@ -366,6 +384,7 @@
     text-decoration: none;
     color: inherit;
     overflow: hidden;
+    box-shadow: var(--shadow-card);
     transition: box-shadow 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
   }
   .event-card::before{
@@ -378,7 +397,7 @@
   .event-card[data-status="realizado"]::before{ background: var(--done); }
   .event-card:hover{
     border-color: var(--accent);
-    box-shadow: 0 10px 24px -14px color-mix(in srgb, var(--brand-navy) 45%, transparent);
+    box-shadow: var(--shadow-hover);
     transform: translateY(-2px);
   }
   .event-card:focus-visible{ outline: 2px solid var(--accent); outline-offset: 3px; }
@@ -463,8 +482,10 @@
     font-weight: 700;
     cursor: pointer;
     white-space: nowrap;
+    box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+    transition: background 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
   }
-  .btn-save:hover{ background: var(--accent-ink); }
+  .btn-save:hover{ background: var(--accent-ink); transform: translateY(-1px); }
   .btn-save.is-saved{ background: var(--good); }
   .toast{
     position: fixed;
@@ -619,12 +640,42 @@
   .pill--urgent{ background: var(--critical-bg); color: var(--critical); margin-left: 0.35rem; }
 
   .event-detail{
-    padding: 0.25rem 1rem 2rem 0.25rem;
+    padding: 0.5rem 0 2.5rem;
     display:grid;
     grid-template-columns: 1fr 1fr;
-    gap: 1.75rem 2rem;
+    gap: 1.4rem 1.25rem;
   }
   .full-block{ grid-column: 1 / -1; }
+  .detail-block{
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 1.3rem 1.4rem;
+    box-shadow: var(--shadow-card);
+  }
+  .section-divider{
+    grid-column: 1 / -1;
+    display:flex;
+    align-items:center;
+    gap: 0.9rem;
+    margin: 0.5rem 0 -0.3rem;
+  }
+  .section-divider:first-child{ margin-top: 0; }
+  .section-divider-label{
+    font-family: var(--font-body);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.17em;
+    color: var(--brand-teal);
+    white-space: nowrap;
+  }
+  .section-divider::after{
+    content:'';
+    flex: 1 1 auto;
+    height: 1px;
+    background: var(--line);
+  }
   .icon{ flex: 0 0 auto; color: var(--brand-teal); }
   .detail-block h3{
     display:flex;
@@ -799,6 +850,11 @@
     width: 100%;
     max-width: 22rem;
     text-align:center;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    padding: 2.25rem 2rem;
+    box-shadow: var(--shadow-pop);
   }
   .auth-eyebrow{
     font-family: var(--font-body);
@@ -851,8 +907,10 @@
     font-size: 0.9rem;
     cursor: pointer;
     font-family: var(--font-body);
+    box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+    transition: background 0.15s ease, transform 0.15s ease;
   }
-  .auth-btn:hover{ background: var(--accent-ink); }
+  .auth-btn:hover{ background: var(--accent-ink); transform: translateY(-1px); }
   .auth-error{
     color: var(--critical);
     font-size: 0.82rem;
@@ -903,7 +961,7 @@
   .plan-open-text strong{ font-size:0.95rem; color:var(--ink); }
   .plan-open-text span{ font-size:0.8rem; color:var(--ink-soft); }
   dialog#plan-dialog{ border:none; border-radius:16px; padding:0; background:var(--paper); color:var(--ink);
-    width:min(760px, 94vw); max-height:90vh; overflow:auto; }
+    width:min(760px, 94vw); max-height:90vh; overflow:auto; box-shadow: var(--shadow-pop); }
   dialog#plan-dialog::backdrop{ background: rgba(8, 12, 14, 0.55); }
   .plan-head{ position:sticky; top:0; z-index:2; background:var(--paper); padding:1.1rem 1.3rem 0.8rem; border-bottom:1px solid var(--line); display:grid; gap:0.55rem; }
   .plan-head-top{ display:flex; justify-content:space-between; align-items:flex-start; gap:0.8rem; }
@@ -944,6 +1002,7 @@
     width: min(580px, 92vw);
     max-height: 88vh;
     overflow: auto;
+    box-shadow: var(--shadow-pop);
   }
   dialog#event-form-dialog::backdrop{ background: rgba(8, 12, 14, 0.55); }
   .dialog-inner{ padding: 1.6rem; }
@@ -998,8 +1057,10 @@
     font-weight: 700;
     font-size: 0.85rem;
     cursor: pointer;
+    box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--accent) 55%, transparent);
+    transition: background 0.15s ease, transform 0.15s ease;
   }
-  .btn-primary:hover{ background: var(--accent-ink); }
+  .btn-primary:hover{ background: var(--accent-ink); transform: translateY(-1px); }
   .btn-secondary{
     background: transparent;
     border: 1px solid var(--line);
@@ -1291,6 +1352,10 @@
   };
   function icon(name){
     return `<svg class="icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON_PATHS[name] || ""}</svg>`;
+  }
+
+  function sectionDivider(label){
+    return `<div class="section-divider"><span class="section-divider-label">${escapeHtml(label)}</span></div>`;
   }
 
   let toastTimer;
@@ -2319,6 +2384,7 @@
 
     return `
       <div class="event-detail">
+        ${sectionDivider("Evento")}
         <div class="detail-block">
           <h3>${icon("doc")}Contrapartidas</h3>
           <textarea class="notes-input" data-contrapartidas-input placeholder="Descreva as contrapartidas negociadas para este evento…">${escapeHtml(contra)}</textarea>
@@ -2339,24 +2405,8 @@
             <input type="number" min="0" class="check-text" data-credentials-input value="${escapeHtml(String(credentials))}" placeholder="Ex.: 5" style="flex:0 0 5rem;" />
           </div>
         </div>
-        <div class="detail-block">
-          <h3>${icon("users")}Expositores no evento</h3>
-          <div class="contact-list">${renderExhibitors(ev)}</div>
-          <div class="add-row add-row--contact">
-            <input type="text" class="add-input" data-exhibitor-name-input placeholder="Nome completo" />
-            <input type="text" class="add-input" data-exhibitor-cpf-input placeholder="CPF (000.000.000-00)" />
-            <button type="button" class="btn-add-inline" data-add-exhibitor-btn>Adicionar</button>
-          </div>
-          <p class="notes-hint">Vinculado às credenciais disponíveis acima.</p>
-        </div>
-        <div class="detail-block">
-          <h3>${icon("doc")}Anexos</h3>
-          <div class="contact-list">${renderAttachments(ev)}</div>
-          <div class="add-row">
-            <input type="file" class="add-input" data-attachment-input multiple style="padding:0.35rem 0.5rem;" />
-          </div>
-          <p class="notes-hint">Arquivos até 3 MB, salvos neste navegador.</p>
-        </div>
+
+        ${sectionDivider("Checklist")}
         <div class="detail-block full-block">
           <h3>${icon("tasks")}Checklist</h3>
           <div class="progress-wrap">
@@ -2370,7 +2420,9 @@
             <button type="button" class="btn-add-inline" data-add-task-btn>Adicionar</button>
           </div>
         </div>
-        <div class="detail-block">
+
+        ${sectionDivider("Financeiro")}
+        <div class="detail-block full-block">
           <h3>${icon("badge")}Status do contrato</h3>
           <textarea class="notes-input" data-contract-status-input placeholder="Ex.: contrato assinado, aguardando retorno da organização…">${escapeHtml(contractStatusText)}</textarea>
 
@@ -2385,6 +2437,18 @@
           ${ev.link ? `<div class="note-box">Agenda: <a href="${escapeHtml(ev.link)}" target="_blank" rel="noopener" style="color:var(--accent-ink)">${escapeHtml(ev.link)}</a></div>` : ""}
           ${ev.isCustom ? `<button type="button" class="btn-delete" data-delete-event="${ev.id}">Remover evento</button>` : ""}
         </div>
+
+        ${sectionDivider("Pessoas")}
+        <div class="detail-block">
+          <h3>${icon("users")}Expositores no evento</h3>
+          <div class="contact-list">${renderExhibitors(ev)}</div>
+          <div class="add-row add-row--contact">
+            <input type="text" class="add-input" data-exhibitor-name-input placeholder="Nome completo" />
+            <input type="text" class="add-input" data-exhibitor-cpf-input placeholder="CPF (000.000.000-00)" />
+            <button type="button" class="btn-add-inline" data-add-exhibitor-btn>Adicionar</button>
+          </div>
+          <p class="notes-hint">Vinculado às credenciais disponíveis acima.</p>
+        </div>
         <div class="detail-block">
           <h3>${icon("users")}Contatos</h3>
           <div class="contact-list">${renderContacts(ev)}</div>
@@ -2394,6 +2458,16 @@
             <button type="button" class="btn-add-inline" data-add-contact-btn>Adicionar</button>
           </div>
         </div>
+        <div class="detail-block">
+          <h3>${icon("doc")}Anexos</h3>
+          <div class="contact-list">${renderAttachments(ev)}</div>
+          <div class="add-row">
+            <input type="file" class="add-input" data-attachment-input multiple style="padding:0.35rem 0.5rem;" />
+          </div>
+          <p class="notes-hint">Arquivos até 3 MB, salvos neste navegador.</p>
+        </div>
+
+        ${sectionDivider("Anotações")}
         <div class="detail-block notes-block full-block">
           <h3>${icon("notes")}Anotações</h3>
           <textarea class="notes-input" data-notes-input placeholder="Observações, decisões, pendências…">${escapeHtml(note)}</textarea>
